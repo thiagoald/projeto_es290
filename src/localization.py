@@ -129,3 +129,29 @@ def result_map(positions,
                         opacity=0.5).add_to(map_)
     map_.save(output_file)
     print('Map saved!')
+
+def gen_tri_struct(df_btss, cells):
+    btss = []
+    for bts in df_btss.values:
+        btss.append([])
+        # TODO: Substituir 6 pelo TA máximo
+        for i in range(50):
+            min_dist = i*550
+            max_dist = (i + 1)*550
+            cells_list = []
+            for cell_pos, cell_fing in cells:
+                bts_pos = bts[1:3]
+                d = get_distance_in_meters(cell_pos[0], cell_pos[1], bts_pos[0], bts_pos[1])
+                if min_dist < d < max_dist:
+                    cells_list.append((tuple(cell_pos), cell_fing))
+            btss[-1].append(cells_list)
+    return btss
+
+def search_tri(point_tas,
+               point_fp,
+               btss):
+    cell_set = set(btss[0][int(point_tas[0])])
+    for bts_idx, ta in list(enumerate(point_tas))[1:]:
+        bts = btss[bts_idx]
+        cell_set = cell_set.intersection(set(bts[int(ta)]))
+    return cell_search(point_fp, list(cell_set))
