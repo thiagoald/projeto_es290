@@ -2,8 +2,18 @@ import folium
 import pandas as pd
 import numpy as np
 from sklearn import linear_model, neighbors
+from sklearn.model_selection import GridSearchCV
 import matplotlib.pyplot as plt
 from math import sin, cos, sqrt, atan2, radians
+import seaborn as sns
+
+def get_errors(original_points,pred_positions):
+    errors = []
+    for (lat, lon), (pred_lat, pred_lon) in zip(list(original_points[original_points.columns[1:3]].values),
+                                                pred_positions):
+        error = get_distance_in_meters(lat, lon, pred_lat, pred_lon)
+        errors.append(error)
+    return errors
 
 def get_distance_in_meters(lat1_degrees,
                            lon1_degrees,
@@ -68,10 +78,15 @@ def gen_regressors(samples, targets, params=('knn', 3)):
     regressors = []
     for target in targets:
         if 'knn' in params:
-            rssi_reg = neighbors.KNeighborsRegressor(n_neighbors=params[1])
+            knn = neighbors.KNeighborsRegressor()
+            rssi_reg = GridSearchCV(knn,
+                                    {'n_neighbors':list(range(1, 30))},
+                                    cv=10,
+                                    scoring='neg_mean_squared_error')
         else:
             rssi_reg = linear_model.LinearRegression(normalize=True)
         rssi_reg.fit(samples, target)
+        rssi_reg = rssi_reg.best_estimator_
         regressors.append(rssi_reg)
     return regressors
 
@@ -129,9 +144,9 @@ def result_map(positions,
                         opacity=0.5).add_to(map_)
     map_.save(output_file)
     print('Map saved!')
-    return map_
+    # return map_
 
-def gen_tri_struct(df_btss, cells):
+def gen_taf_struct(df_btss, cells):
     btss = []
     for bts in df_btss.values:
         btss.append([])
@@ -148,7 +163,7 @@ def gen_tri_struct(df_btss, cells):
             btss[-1].append(cells_list)
     return btss
 
-def search_tri(point_tas,
+def search_taf(point_tas,
                point_fp,
                btss):
     # print('TAs:', point_tas)
@@ -163,3 +178,54 @@ def search_tri(point_tas,
         # print('After BTS {}: {}'.format(bts_idx, len(cell_set)))
     # print('Final search space: ', len(cell_set))
     return cell_search(point_fp, list(cell_set))
+
+def show_stats(errors):
+    print("Min Error (in meters):{}".format(np.min(errors)))
+    print("Max Error (in meters):{}".format(np.max(errors)))
+    print("Mean Error (in meters):{}".format(np.mean(errors)))
+    print("Std. Deviation (in meters):{}".format(np.std(errors)))
+
+def show_stats_graphs(errors):
+    # Individual errors
+    plt.plot(range(len(errors)),
+            errors,
+            color='blue',
+            linestyle='dashed',
+            marker='o',
+            markerfacecolor='red',
+            markersize=10)
+    plt.title('Errors')
+    plt.xlabel('Index')
+    plt.ylabel('Error (m)')
+    plt.show()
+
+    # Histogram
+    plt.title('Histogram of errors')
+    plt.ylabel('# of samples')
+    plt.xlabel('Error (m)')
+    plt.hist(errors, 10)
+    plt.show()
+
+    # Cumulative
+    plt.title('Cumulative error')
+    plt.xlabel('Error (m)')
+    plt.ylabel('% of samples')
+    X = np.linspace(1., max(errors), 100)
+    Y = []
+    for x in X:
+        Y.append(100*len([e for e in errors if e<x])/len(errors))
+
+    plt.plot(X, Y)
+    plt.show()
+
+def show_box_plots(errors_list, names):
+    all_errors = []
+    [all_errors.extend(errors) for errors in errors_list]
+    labels = []
+    [labels.extend([names[i]]*len(errors_list[i])) for i in range(len(errors_list))]
+    df_data = {'Error (m)': all_errors,
+               'Approach': labels}
+    df = pd.DataFrame(df_data)
+    plt.title('Boxplots')
+    sns.boxplot(x="Approach", y="Error (m)", data=df,width=0.8)
+    plt.show()
