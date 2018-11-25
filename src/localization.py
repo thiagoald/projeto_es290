@@ -129,6 +129,7 @@ def result_map(positions,
                         opacity=0.5).add_to(map_)
     map_.save(output_file)
     print('Map saved!')
+    return map_
 
 def gen_tri_struct(df_btss, cells):
     btss = []
@@ -150,8 +151,15 @@ def gen_tri_struct(df_btss, cells):
 def search_tri(point_tas,
                point_fp,
                btss):
+    # print('TAs:', point_tas)
     cell_set = set(btss[0][int(point_tas[0])])
+    # print('Initial search space: ', len(cell_set))
+    # TODO: Choose smallest TA to begin with
     for bts_idx, ta in list(enumerate(point_tas))[1:]:
         bts = btss[bts_idx]
-        cell_set = cell_set.intersection(set(bts[int(ta)]))
+        new_cell_set = cell_set.intersection(set(bts[int(ta)]))
+        if len(new_cell_set) > 0:
+            cell_set = new_cell_set
+        # print('After BTS {}: {}'.format(bts_idx, len(cell_set)))
+    # print('Final search space: ', len(cell_set))
     return cell_search(point_fp, list(cell_set))
