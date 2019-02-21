@@ -175,9 +175,11 @@ def search_taf(point_tas,
         new_cell_set = cell_set.intersection(set(bts[int(ta)]))
         if len(new_cell_set) > 0:
             cell_set = new_cell_set
-        # print('After BTS {}: {}'.format(bts_idx, len(cell_set)))
-    # print('Final search space: ', len(cell_set))
-    return cell_search(point_fp, list(cell_set))
+            #print('After BTS {}: {}'.format(bts_idx, len(cell_set)))
+    #print('Final search space: ', len(cell_set))
+    pos = cell_search(point_fp, list(cell_set))
+    #print(pos)
+    return pos[0], len(cell_set)
 
 def show_stats(errors):
     print("Min Error (in meters):{}".format(np.min(errors)))
@@ -203,6 +205,7 @@ def show_stats_graphs(errors):
     plt.title('Histogram of errors')
     plt.ylabel('# of samples')
     plt.xlabel('Error (m)')
+    plt.axis([0, 2000, 0, 120])
     plt.hist(errors, 10)
     plt.show()
 
