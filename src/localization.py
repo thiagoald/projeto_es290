@@ -84,9 +84,9 @@ def gen_regressors(samples, targets, params=('knn', 3)):
                                     cv=10,
                                     scoring='neg_mean_squared_error')
         else:
-            rssi_reg = linear_model.LinearRegression(normalize=True)
+            rssi_reg = linear_model.LinearRegression(normalize=False)
         rssi_reg.fit(samples, target)
-        rssi_reg = rssi_reg.best_estimator_
+        #rssi_reg = rssi_reg.best_estimator_
         regressors.append(rssi_reg)
     return regressors
 
@@ -110,6 +110,10 @@ def cell_search(fingerprint, cells):
     closest = sorted(cells,
                      key=lambda x: distance(fingerprint, x[1]))[0]
     return closest
+#def cell_search_taf(fingerprint, cells):
+#    '''Find position'''
+    
+#    position = np.mean(cell
 
 def result_map(positions,
                predicted_positions,
@@ -178,8 +182,8 @@ def search_taf(point_tas,
             #print('After BTS {}: {}'.format(bts_idx, len(cell_set)))
     #print('Final search space: ', len(cell_set))
     pos = cell_search(point_fp, list(cell_set))
-    #print(pos)
-    return pos[0], len(cell_set)
+    #print(list(cell_set))
+    return pos[0], list(cell_set)
 
 def show_stats(errors):
     print("Min Error (in meters):{}".format(np.min(errors)))
