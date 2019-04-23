@@ -107,8 +107,7 @@ def cell_search(fingerprint, cells):
     Each cell is ((lat, lon), fingerprint)'''
     # TODO: Replace sort with another algorithm with a cost inferior to
     # n*log(n)
-    closest = sorted(cells,
-                     key=lambda x: distance(fingerprint, x[1]))[0]
+    closest = sorted(cells,key=lambda x: distance(fingerprint, x[1]))[0]
     return closest
 #def cell_search_taf(fingerprint, cells):
 #    '''Find position'''
@@ -181,6 +180,8 @@ def search_taf(point_tas,
             cell_set = new_cell_set
             #print('After BTS {}: {}'.format(bts_idx, len(cell_set)))
     #print('Final search space: ', len(cell_set))
+    cell_set_list = list(cell_set)
+    #print(cell_set_list)
     pos = cell_search(point_fp, list(cell_set))
     #print(list(cell_set))
     return pos[0], list(cell_set)
