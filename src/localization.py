@@ -80,7 +80,7 @@ def gen_regressors(samples, targets, params=('knn', 3)):
         if 'knn' in params:
             knn = neighbors.KNeighborsRegressor()
             rssi_reg = GridSearchCV(knn,
-                                    {'n_neighbors':list(range(1, 30))},
+                                    {'n_neighbors':list(range(1, 30)), 'weights' : ['distance']},
                                     cv=10,
                                     scoring='neg_mean_squared_error')
         else:
