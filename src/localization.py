@@ -7,6 +7,38 @@ import matplotlib.pyplot as plt
 from math import sin, cos, sqrt, atan2, radians
 import seaborn as sns
 
+def generate_ta_values(bts_list, positions):
+    #print(cell_position[0][0])
+    #print(bts_list.values[0])
+    
+    cells_ta = []
+    for cell_position in positions:
+        ta_values = []
+        for bts in bts_list.values:
+            bts_pos = bts[1:3]
+            dist = int(get_distance_in_meters(cell_position[0], cell_position[1], bts_pos[0], bts_pos[1]))
+            ta_values.append(int(dist / 550))
+        cells_ta.append(ta_values)
+    return cells_ta
+
+def FilterGrid(cells,test_sample):
+    subsets = [[] for x in range(7)]
+    for cell in cells:
+        #print(cell)
+        points = 0
+        for i in range(6):
+            #print(cell[2])
+            if cell[2][i] == test_sample[i]:
+                points += 1
+                #print("deu match")
+                #reduced_cells.append(cell)
+        subsets[points].append(cell)
+    #print(subsets)
+
+    for subset in reversed(subsets):
+        if(len(subset) > 0):
+            return subset
+
 def get_errors(original_points,pred_positions):
     errors = []
     for (lat, lon), (pred_lat, pred_lon) in zip(list(original_points[original_points.columns[1:3]].values),
