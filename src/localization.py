@@ -186,7 +186,7 @@ def gen_taf_struct(df_btss, cells):
     for bts in df_btss.values:
         btss.append([])
         # TODO: Substituir 6 pelo TA máximo
-        for i in range(50):
+        for i in range(10):
             min_dist = i*550
             max_dist = (i + 1)*550
             cells_list = []
