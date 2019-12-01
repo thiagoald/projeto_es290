@@ -1,3 +1,6 @@
 *.pyc
 src/__pycache__/
 .ipynb_checkpoints/
+resources/
+venv/
+requirements/
